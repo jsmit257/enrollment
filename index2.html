@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>TeezHead Course Waiver</title>
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="waive liability for this course material">
+
+  <link rel="shortcut icon" href="#">
+
+  <style>
+    body {
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 150%;
+      margin-left: auto;
+      margin-right: auto;
+      margin-top: 2em;
+      /* min-width: 80em; */
+      width: 60%;
+    }
+
+    p,
+    li {
+      margin-bottom: 1em;
+    }
+
+    input {
+      border-radius: .33em;
+      font-size: inherit;
+      margin-left: .33em;
+      padding-left: .33em;
+    }
+
+    .print-only {
+      visibility: hidden;
+    }
+
+    .slug {
+      text-decoration: underline;
+    }
+
+    .jh,
+    .text,
+    .button.continue,
+    .agree,
+    body.printable .user-info {
+      display: none;
+    }
+
+    body.printable .text,
+    .waiver.ok:not(.reading) .button.continue,
+    .waiver.reading .button.print,
+    .waiver.reading .jh {
+      display: block;
+    }
+
+    .title {
+      font-weight: bolder;
+      line-height: 200%;
+      text-align: center;
+      width: 100%;
+    }
+
+    .user-info {
+      margin-top: .33em;
+    }
+
+    .user-info>label {
+      display: inline-block;
+      text-align: right;
+      vertical-align: text-bottom;
+      width: 8em;
+    }
+
+    .text {
+      margin-top: 1em;
+    }
+
+    .button {
+      border-radius: .75em;
+      color: white;
+      cursor: pointer;
+      line-height: 150%;
+      margin-top: 1em;
+      padding-left: .75em;
+      padding-right: .75em;
+      text-align: center;
+      width: fit-content;
+    }
+
+    .button.continue {
+      background-color: green;
+      margin-left: 8.66em;
+    }
+
+    .button.print {
+      background-color: #0014cc;
+      float: right;
+    }
+
+    .button.waiting {
+      background-color: green;
+    }
+
+    .button.capturing {
+      background-color: red;
+    }
+
+    .declarations,
+    .specifics {
+      list-style-position: inside;
+      margin: 0px;
+      padding: 0px;
+    }
+
+    .declarations,
+    .released {
+      list-style-type: none;
+    }
+
+    .specifics {
+      list-style-type: decimal;
+    }
+
+    .closing {
+      text-transform: uppercase;
+    }
+
+    .today {
+      border-bottom: 1px solid;
+      /* width should be equal to signature canvas width */
+      width: 500px;
+    }
+
+    .jh {
+      margin-top: 2em;
+    }
+
+    .jh>canvas {
+      background-color: lightsteelblue;
+      border-radius: .75em;
+      display: block;
+    }
+
+    .jh>label {
+      color: darkred;
+      cursor: pointer;
+      display: inline-block;
+      font-size: initial;
+      font-weight: bolder;
+      text-align: right;
+      /* same width as the signature canvas, for now */
+      width: 500px;
+    }
+
+    .today::before,
+    .jh::after {
+      display: inline-block;
+      font-size: smaller;
+      padding-left: 1em;
+      position: relative;
+    }
+
+    .today::before {
+      content: 'Dated';
+      margin-right: -8em;
+      top: 1.5em;
+      width: 8em;
+    }
+
+    .jh::after {
+      content: 'Signature';
+      left: -500px;
+    }
+
+    .footer {
+      bottom: 3em;
+      display: none;
+      text-align: center;
+    }
+
+    @media print {
+      body {
+        font-size: initial;
+        /* margin-bottom: 4em; */
+        margin-top: 0;
+        width: 80%;
+      }
+
+      .print-only {
+        visibility: visible;
+      }
+
+      .screen-only {
+        visibility: hidden;
+      }
+
+      .jh>canvas {
+        background-color: transparent;
+        border-radius: 0;
+        border-bottom: 1px solid;
+      }
+
+      .mailto:not([href="mailto:"]) {
+        display: block;
+      }
+
+      .mailto::before {
+        content: 'Participant Email Address';
+        margin-right: .3em;
+        text-decoration: none;
+        color: inherit;
+      }
+    }
+  </style>
+
+  <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.7/dist/signature_pad.umd.min.js"></script>
+</head>
+
+<body>
+  <div class="waiver" var="waiver">
+    <div class="title">General Release Of Liability Form</div>
+
+    <div class="field user-info">
+      <label for="firstname">firstname</label>
+      <input id="firstname" tabindex="0" var="first">
+    </div>
+
+    <div class="field user-info">
+      <label for="lastname">lastname</label>
+      <input id="lastname" tabindex="0" var="last">
+    </div>
+
+    <div class="field user-info">
+      <label for="email">email</label>
+      <input id="email" type="email" tabindex="0" autocomplete var="eml">
+    </div>
+
+    <div class="button continue" tabindex="0">read waiver now</div>
+
+    <!-- BEGIN: custom waiver text goes in this block -->
+    <div class="text">
+      <ul class="declarations">
+        <li>
+          I, <span class="slug username"></span> HEREBY ASSUME ALL OF THE RISKS OF PARTICIPATING IN ANY/ALL ACTIVITIES
+          being conducted by TEEZHEAD, LLC during and/or after class activities. Including by way of example and not
+          limitation, any risks that may arise from negligence or carelessness on the part of the persons or entities
+          being released from any dangerous activities or side effects resulting from possession and/or consumption of
+          shared samples, also to include any equipment or property owned, maintained, or controlled by them, or because
+          of their possible liability without fault.
+        </li>
+        <li>
+          I CERTIFY that I am at least 21 years of age or older and am both physically and mentally able to participate
+          in this class and assume full ownership of shared samples obtained from this class. Additionally, I have not
+          been advised to not participate by a qualified medical professional.
+        </li>
+        <li>
+          I CERTIFY that there are no health-related reasons or problems which preclude my participation in this
+          activity or taking ownership of shared samples. I acknowledge that this Accident Waiver and Release of
+          Liability Form will be used by the class holders, sponsors, and organizers of the activity in which I may
+          participate, and that it will govern my actions and responsibilities at said class.
+        </li>
+      </ul>
+
+      <p>
+        In consideration of my application and permitting me to participate in this activity, I hereby take action for
+        myself, my executors, administrators, heirs, next of kin, successors, and assigns as follows:
+      </p>
+      <ol class="specifics">
+        <li>
+          I WAIVE, RELEASE, AND DISCHARGE from any and all liability, including but not limited to, liability arising
+          from the negligence or fault of the entities or persons released, for my death, disability, personal injury,
+          property damage, property theft, or actions of any kind which may hereafter occur to me including my traveling
+          to and from this activity, THE FOLLOWING ENTITIES OR PERSONS:
+        </li>
+        <ul class="released">
+          <li>
+            TEEZHEAD, LLC. and/or their directors, officers, employees, volunteers, representatives, and agents, and the
+            activity holders, sponsors, and volunteers.
+          </li>
+        </ul>
+        <li>
+          INDEMNIFY, HOLD HARMLESS, AND PROMISE NOT TO SUE the entities or persons mentioned in this paragraph from any
+          and all liabilities or claims made as a result of participation in this activity or consumption of shared
+          samples, whether caused by the negligence of release or otherwise.
+        </li>
+      </ol>
+      <p>
+        I acknowledge that TEEZHEAD, LLC and their directors, officers, volunteers, representatives, and agents are NOT
+        responsible for errors, omissions, acts, or failures to act of any party or entity conducting a specific
+        activity on their behalf.
+      </p>
+      <p>
+        I acknowledge the consumption of shared samples has not taken place on the class premises and will take place
+        elsewhere of my own free will. I acknowledge the consumption of shared samples may test a person's physical and
+        mental limits and carries with it the potential for Dilated Pupils, Drowsiness and Yawning, Impaired
+        Concentration, Muscle Weakness, Lack of Coordination, Nausea and Vomiting, Paranoia Confusion, or Frightening
+        Hallucinations (Bad Trip). I acknowledge shared samples should only be consumed in a safe environment and I
+        assume all risks associated with any activities I partake in during and/or after consumption of shared samples.
+      </p>
+      <p>
+        The Accident Waiver and Release of Liability Form shall be construed broadly to provide a release and waiver to
+        the maximum extent permissible under applicable law.
+      </p>
+      <p class="closing">
+        I certify that I have read this document and I fully understand its content. I am aware that this
+        is a release of liability and a contract and I sign it of my own free will.
+      </p>
+
+      <div class="today">today</div>
+    </div>
+    <!-- END: custom waiver text goes in this block -->
+
+    <div class="field jh">
+      <canvas id="signature" height="60" width="500" tabindex="0" var="cnvs"></canvas>
+      <label class="screen-only">erase</label>
+    </div>
+
+    <div class="button print agree screen-only" tabindex="0">save</div>
+
+    <a href="mailto:" class="footer mailto print-only">email</a>
+  </div>
+</body>
+
+<script>
+  new function () {
+    Element.prototype.hasClass = function (clz) {
+      return this.className.trim().split(/\s+/g).indexOf(clz) < 0
+    }
+    Element.prototype.addClass = function (...clzs) {
+      let result = this.className.trim().split(/\s+/g).filter(v => v.length)
+      clzs.join(' ').trim().split(/\s+/g).forEach(clz =>
+        result.indexOf(clz) == -1 && result.push(clz))
+      this.className = result.sort().join(' ')
+      return this
+    }
+    Element.prototype.removeClass = function (...clzs) {
+      let result = this.className.trim().split(/\s+/g).filter(v => v.length)
+      clzs.join(' ').trim().split(/\s+/g).forEach(clz => {
+        for (i = result.indexOf(clz); i != -1; i = result.indexOf(clz)) {
+          result.splice(i, 1)
+        }
+      })
+      this.className = result.sort().join(' ')
+      return this
+    }
+    Element.prototype.toggleClass = function (...clzs) {
+      clzs.join(' ').trim().split(/\s+/g).forEach(clz =>
+        this.withClass(!thishasClass(clz), clz))
+      return this
+    }
+    Element.prototype.withClass = function (add, ...clzss) {
+      return this[add ? 'addClass' : 'removeClass'](...clzss)
+    }
+
+    document.body.querySelectorAll('[var]').forEach(v => this[v.getAttribute('var')] = v)
+
+    let isOK = _ => this.waiver.withClass(this.first.value.length && this.last.value.length, 'ok')
+
+    this.first.addEventListener('change', isOK)
+    this.last.addEventListener('change', isOK)
+    this.waiver.querySelector('.button.continue')
+      .addEventListener('click', e => {
+        this.waiver.addClass('reading').querySelectorAll('.slug.username').forEach(u =>
+          u.innerText = `${this.first.value} ${this.last.value}`)
+        this.waiver.querySelector('a.mailto').href = `mailto:${this.eml.value}`
+        this.waiver.querySelector('a.mailto').innerText = `${this.eml.value}`
+        this.waiver.querySelectorAll('.today').forEach(d => d.innerText =
+          new Date().toString().replace(/ GMT.*/, ''))
+        document.head.querySelector('title').innerText += `-(${this.first.value}.${this.last.value})`
+        document.body.addClass('printable')
+      })
+    this.waiver.querySelector('.jh>label')
+      .addEventListener('click', _ =>
+        this.cnvs.getContext('2d').clearRect(0, 0, this.cnvs.width, this.cnvs.height))
+    this.waiver.querySelector('.button.print')
+      .addEventListener('click', _ => window.print())
+
+    new SignaturePad(this.cnvs)
+  }()
+</script>
+
+</html>

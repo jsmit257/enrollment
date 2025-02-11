@@ -1,0 +1,32 @@
+---
+services:
+  wpdb:
+    image: mysql:8.0
+    restart: always
+    hostname: wpdb
+    environment:
+      MYSQL_DATABASE: exampledb
+      MYSQL_USER: exampleuser
+      MYSQL_PASSWORD: examplepass
+      MYSQL_RANDOM_ROOT_PASSWORD: '1'
+    volumes: [ ./mysql:/var/lib/mysql ]
+
+  wp:
+    depends_on: [ wpdb ]
+    image: wordpress
+    restart: always
+    hostname: wordpress
+    ports: [ 1081:80 ]
+    environment:
+      WORDPRESS_DB_HOST: wpdb
+      WORDPRESS_DB_USER: exampleuser
+      WORDPRESS_DB_PASSWORD: examplepass
+      WORDPRESS_DB_NAME: exampledb
+    volumes: [ ./www:/var/www/html ]
+
+  enroll:
+    # depends_on: [ wp ]
+    image: enroll:latest
+    build: .
+    hostname: enroll
+    ports: [ 1080:80 ]

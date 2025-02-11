@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>Camera Test</title>
+  <link rel="shortcut icon" href="data:image/x-icon;," type="image/x-icon">
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="waive liability for this course material">
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+  <script defer>
+    $(_ => $('.imgbox')
+      .on('activate', e => console.log('activate called on root'))
+      // capture controls
+      .on('init', '>.viddevs', e => {
+        let $devs = $(e.currentTarget).empty()
+        navigator.mediaDevices.enumerateDevices()
+          .then(devices => devices.forEach(dev => (dev.kind === "videoinput") && $('<div>')
+            .addClass('viddev')
+            .attr('id', dev.deviceId)
+            .text(dev.label || `Camera ${$devs.children().length}`)
+            .appendTo($devs)))
+          .catch(alert)
+          .finally(_ => $devs.children().length || $('<div>')
+            .addClass('viddev retry')
+            .attr('id', 'retry')
+            .text('try again')
+            .appendTo($devs))
+      })
+      .on('click', '>.viddevs>.viddev.retry', e => $(e.currentTarget).parent().trigger('init'))
+      .on('click', '>.viddevs>.viddev.selected', e => {
+        let $box = $(e.delegateTarget)
+        if ($box.hasClass('capturing')) {
+          $box.find('>.vidcap').trigger('stop')
+        } else {
+          $(e.currentTarget).removeClass('selected').trigger('click')
+        }
+      })
+      .on('click', '>.viddevs>.viddev:not(.selected)', async e => {
+        $(e.currentTarget)
+          .parent()
+          .find('>.selected')
+          .removeClass('selected')
+
+        let $sel = $(e.currentTarget).addClass('selected')
+        let cam = $(e.delegateTarget)
+          .find('>.vidcap')
+          .trigger('stop') // removes 'capturing' and adds 'waiting'
+          .get(0)
+
+        try {
+          cam.srcObject = await navigator.mediaDevices.getUserMedia({
+            video: {
+              deviceId: e.currentTarget.id
+            },
+          })
+          $(e.delegateTarget).removeClass('waiting').addClass('capturing')
+        } catch (ex) {
+          console.log('getUserMedia', ex)
+        }
+      })
+      // capture events
+      .on('click', '.vidcap', e => {
+        let src = e.currentTarget
+        let view = $(e.delegateTarget).find('.imgedit>.viewport').get(0)
+        let pic = $(view).find('>canvas').get(0)
+        pic.width = src.videoWidth
+        pic.height = src.videoHeight
+        pic.getContext('2d').drawImage(src, 0, 0)
+
+        $(e.delegateTarget)
+          .find('>.imgedit>.viewport')
+          .css({
+            backgroundImage: `url(${pic.toDataURL('image/png', 1)})`,
+            backgroundSize: `${src.videoWidth}px ${src.videoHeight}px`,
+          })
+      })
+      .on('stop', '>.vidcap', e => {
+        $(e.delegateTarget).addClass('waiting').removeClass('capturing')
+
+        let src = e.currentTarget.srcObject
+        if (src == null) {
+          return
+        } else try {
+          src.getTracks().forEach(track => track.stop())
+        } catch (ex) {
+          console.log('error closing camera tracks', ex)
+        }
+
+        e.currentTarget.srcObject = null
+      })
+      // editor actions
+      .on('crop', '>.imgedit', e => {
+        let box = e.currentTarget
+        let pic = box.querySelector('.viewport>canvas')
+        let crop = {
+          x: -box.style.backgroundPositionX,
+          y: -box.style.backgroundPositionY,
+        }
+        pic.draw(pic, crop.x, crop.y, crop.w + crop.x, crop.h + crop.y, 0, 0, crop.w, crop.y)
+      })
+      .on('pan', '>.imgedit', e => { })
+      .on('resize', '>.imgedit', e => { })
+      .on('zoom', '>.imgedit', e => { })
+      .on('click', '.imgedit>.viewport>canvas', e => $(e.delegateTarget)
+        .find('>.gallery')
+        .trigger('create', e.currentTarget))
+      // gallery stuff
+      .on('create', '>.gallery', (e, src) => $('<div>')
+        .append($('<img>')
+          .attr('src', src.toDataURL('image/png', 1)))
+        .prependTo($(e.currentTarget)))
+      .on('click', '>.gallery>.img', e => { })
+      // get started
+      .find('>.viddevs')
+      .trigger('init'))
+  </script>
+
+  <style>
+    body {
+      background-color: darkblue;
+      color: white;
+      font-size: 150%;
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+      line-height: 150%;
+    }
+
+    .imgbox {
+      height: 100;
+      width: 100;
+    }
+
+    .vidcap {
+      float: left;
+    }
+
+    .viddevs {
+      background-color: green;
+      border-radius: .5em;
+      float: right;
+      padding-bottom: .33em;
+      padding-top: .33em;
+      width: 34%;
+    }
+
+    .viddev {
+      cursor: pointer;
+      padding-left: .33em;
+      border-radius: 10%;
+    }
+
+    .viddev:hover {
+      background-color: #064600;
+    }
+
+    .viddev::after {
+      color: red;
+      content: '◉';
+      display: none;
+      float: right;
+      font-size: 150%;
+      margin-right: .5em;
+    }
+
+    .viddev.selected {
+      background-image: linear-gradient(transparent, #adadff99, transparent, transparent, transparent, #adadff99, transparent) !important;
+    }
+
+    .capturing>.viddevs>.viddev.selected::after {
+      display: inline-block;
+    }
+
+    .imgedit {
+      background-color: darkorange;
+      border: none;
+      clear: both;
+      float: left;
+      margin-top: 1em;
+      padding: 2px;
+      overflow: auto;
+    }
+
+    .imgedit:hover {
+      background-color: purple;
+    }
+
+    .gallery {
+      float: left;
+      clear: both;
+    }
+
+    video {
+      background-color: darkslateblue;
+    }
+
+    .imgedit>.viewport {
+      background-attachment: local;
+      background-repeat: no-repeat;
+      height: 200px;
+      overflow: auto;
+      width: 300px;
+    }
+
+    .imgedit>.viewport>canvas {
+      background-color: cyan;
+      margin: 0;
+      border: none;
+      padding: 0;
+      float: left;
+      /* visibility: hidden; */
+      opacity: .0;
+    }
+
+    .north,
+    .south,
+    .east,
+    .west {
+      float: left;
+    }
+
+    .imgedit>label {
+      clear: left;
+      font-size: smaller;
+      width: 3em;
+      display: inline-block;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="imgbox waiting">
+    <video class="vidcap" autoplay playsinline>
+      Select an input source
+    </video>
+    <div class="viddevs"></div>
+    <div class="imgedit">
+      <div class="viewport">
+        <canvas></canvas>
+      </div>
+
+      <label for="resize" class="north">resize</label>
+      <input id="resize" class="north" type="range" min="0" max="100" step="1" value="100">
+
+      <label for="zoom" class="west">zoom</label>
+      <input id="zoom" class="west" type="range" min="0" max="100" step="1" value="100">
+
+      <label for="pan" class="south">pan</label>
+      <input id="pan" class="south" type="range" min="0" max="100" step="1" value="100">
+    </div>
+    <div class="gallery"></div>
+  </div>
+</body>
+
+</html>

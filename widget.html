@@ -1,0 +1,131 @@
+<div class="th widget enroll">
+  <div class="form">
+    <datalist id="userslist" src="/wp/v2/users">
+      aaa
+      bbb
+      ccc
+    </datalist>
+
+    <div class="field user-info">
+      <label for="username">username</label>
+      <input id="username" list="userslist">
+    </div>
+
+    <div class="field user-info">
+      <label for="firstname">firstname</label>
+      <input id="firstname">
+    </div>
+
+    <div class="field user-info">
+      <label for="lastname">lastname</label>
+      <input id="lastname">
+    </div>
+
+    <div class="field user-info">
+      <label for="email">email</label>
+      <input id="email" type="email">
+    </div>
+
+    <br>
+
+    <div class="field roles">
+      <label for="newsletter">recieve newsletter</label>
+      <input id="newsletter" name="Subscriber" type="checkbox" checked>
+    </div>
+
+    <div class="field roles">
+      <label for="reciept">recieve signed waiver</label>
+      <!--       
+      maybe not the best interpretation of 'Viewer', means they should
+      recieve waivers (from now until this perm is removed) via the email
+      on record
+      -->
+      <input id="reciept" name="Viewer" type="checkbox">
+    </div>
+
+    <br>
+
+    <div class="field roles">
+      <canvas id="sign" height="60" width="600"></canvas>
+      <!-- <label for="sign">sign here</label> --><!-- `display:block` -->
+    </div>
+
+    <div id="ok" class="button">ok</div>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.7/dist/signature_pad.umd.min.js"></script>
+  <script>
+    (f => {
+      let user = f.querySelector('.field>#username')
+      let first = f.querySelector('.field>#firstname')
+      let last = f.querySelector('.field>#lastname')
+      let eml = f.querySelector('.field>#email')
+      let news = f.querySelector('.field>#newsletter')
+      let rcpt = f.querySelector('.field>#reciept')
+      let signed = new SignaturePad(f.querySelector(".field>#sign"))
+
+      username.addEventListener('change', e => {
+        let xhr = new XMLHttpRequest()
+        xhr.addEventListener('load', e => {
+          switch (xhr.statusCode) {
+            case 200:
+              // f.setAttribute('id', xhr.responseJSON.id)
+              console.log(xhr.responseText)
+              break
+            case 404:
+              f.removeAttribute('id')
+              console.log('removing id attribute', xhr)
+              break
+            default: console.log('unknown status code', xhr.statusCode)
+          }
+        })
+        xhr.open('GET', `/wp-json/wp/v2/users?search=${user.value}`)
+        xhr.send()
+      })
+
+      let change = e => {
+        user.value = `${first.value}.${last.value}`
+        user.dispatchEvent(new Event('change'))
+      }
+
+      first.addEventListener('change', change)
+      last.addEventListener('change', change)
+
+      f.querySelector('#ok').addEventListener('click', e => {
+        let _r = [] // need to init with the roles they already have
+        f.querySelectorAll('.roles>input:checked').forEach(v => _r.push(v.name))
+        _r.filter((val, ndx, arr) => arr.indexOf(val) === ndx)
+
+        let data = {
+          username: username.value,
+          first_name: firstname.value,
+          last_name: lastname.value,
+          email: eml.value,
+          roles: _r,
+          signature: signed.toSVG(),
+        }
+        let method = 'POST'
+        if (f.hasAttribute('id')) {
+          data.id = f.getAttribute('id')
+          method = 'PATCH'
+        }
+
+        let xhr = new XMLHttpRequest()
+        xhr.addEventListener('load', e => {
+          switch (xhr.statusCode) {
+            case 200:
+              // document.location = '' // should redirect to a pdf result
+              console.log(xhr.responseText)
+              break
+            case 404:
+              console.log('what to do about errors?')
+              break
+            default: console.log('unknown status code', xhr.statusCode)
+          }
+        })
+        xhr.open(method, '/wp-json/wp/v2/user?_fmt=pdf')
+        xhr.send(JSON.stringify(data))
+      })
+
+    })(document.querySelector('.th.widget.enroll>.form'))
+  </script>
+</div>
